@@ -13,44 +13,18 @@ import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.Arrays;
 
 @RestController
 public class HelloController {
 
     @GetMapping("/api/hi")
+    @PostAuthorize ("hasRole('ROLE_USER')")
     public String say(@RequestParam("code") String code, @RequestParam("state") String state
-            /*,OAuth2Authentication auth,@AuthenticationPrincipal(expression="name") String name*/) {
-
-        RestTemplate restTemplate = new RestTemplate();
-        String credentials = "clientapp:123";
-        String encodedCredentials = new String(Base64.encodeBase64(credentials.getBytes()));
-        HttpHeaders headers = new HttpHeaders();
-        headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
-        headers.add("Authorization", "Basic " + encodedCredentials);
-        HttpEntity<String> request = new HttpEntity<String>(headers);
-        String access_token_url = "http://localhost:8080/oauth/token";
-        access_token_url += "?client_id=clientapp";
-        access_token_url += "&code=" + code;
-        access_token_url += "&grant_type=authorization_code";
-        ResponseEntity<String> response = restTemplate.exchange(access_token_url, HttpMethod.POST, request, String.class);
-        ObjectMapper mapper = new ObjectMapper();
-        JsonNode node = null;
-        try {
-            node = mapper.readTree(response.getBody());
-        } catch (JsonProcessingException e) {
-            e.printStackTrace();
-        }
-        String token = node.path("access_token").asText();
-        System.out.println(token);
-
-        HttpHeaders headers1 = new HttpHeaders();
-        headers1.add("Authorization", "Bearer " + token);
-        HttpEntity<String> entity = new HttpEntity<>(headers1);
-        String url="http://localhost:8081/user/my";
-        ResponseEntity<String> my = restTemplate.exchange(url, HttpMethod.GET, entity, String.class);
-
-        return my.getBody();
+            , OAuth2Authentication auth, HttpServletRequest httpServletRequest) {
+        String token=httpServletRequest.getHeader("Authorization");
+        return String.format("Hello %s ,%s .%s", state, code,token);
     }
 
     @RequestMapping("/user/my")
